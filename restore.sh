@@ -1,5 +1,15 @@
 #!/bin/bash
 
+SAVEIFS=$IFS
+IFS=$'\n'
+SNAPSHOTS=$(sudo snapper --machine-readable csv -c root list | awk -F, '{printf "%s %s %s\n", $3, $8, $12}')
+for i in $SNAPSHOTS; do
+	echo ${i}
+done
+
+IFS=$SAVEIFS
+exit 0
+
 if [[ $EUID -ne 0 ]]; then
 	echo "Root privileges required. Exiting..."
 	exit 1
@@ -68,3 +78,4 @@ echo $SUBVOLROOT
 
 cd ../
 umount ./btrfsroot
+
