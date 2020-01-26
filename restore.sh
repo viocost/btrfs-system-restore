@@ -40,18 +40,27 @@ if [[ ! -d btrfsroot ]]; then
 	mkdir btrfsroot
 fi
 
-
+echo "MOUNTING BTRFS ROOT"
 mount -t btrfs -o subvolid=0 ${PARTITION} ./btrfsroot
+echo "DONE"
 
 cd ./btrfsroot
+ls
 
-SUBVOL=$(ls)
+ENTRIES=()
+
+for i in $(ls); do
+	ENTRIES+=(${i} "btrfs" off)
+done
+
+echo $ENTRIES
 
 dialog --title "Root subvolume" \
 	--radiolist "Select root btrfs subvolume" 0 0 0 \
-	"${SUBVOL[@]}" 2>subvol.tmp
+	"${ENTRIES[@]}" 2>subvol.tmp
 
 SUBVOLROOT=$(cat subvol.tmp)
+
 rm subvol.tmp
 
 echo $SUBVOLROOT
