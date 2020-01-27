@@ -131,7 +131,7 @@ if [[ ! -d btrfsroot ]]; then
 fi
 
 
-mount -t btrfs -o subvolid=0 ${DEV} ./btrfsroot
+mount -t btrfs -o subvolid=5 ${DEV} ./btrfsroot
 echo "DONE"
 
 cd ./btrfsroot
