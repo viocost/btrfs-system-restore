@@ -1,6 +1,9 @@
 #!/bin/bash
 
-HELP="Description:
+
+HELP="
+
+DESCRIPTION:
 
 This script will restore a snapshot taken by snapper by renaming current subvolume and replacing it with read-write copy of chosen snapshot.
 The replaced subvolume copy will remain and have to be cleared manually later.
@@ -47,7 +50,7 @@ while true; do
 	       -s | --snapshots-dir ) SNAPSHOTSDIR="$2"; shift 2;;
 	       -m | --mount-point ) MOUNT="$2"; shift 2;;
 	       -d | --device ) DEV="$2"; shift 2;;
-	       -h | --help ) echo $HELP; exit 0;;
+	       -h | --help ) echo "$HELP"; exit 0;;
 	       * ) break ;;
        esac
 done       
@@ -92,8 +95,11 @@ dialog --title "Snapshot" \
 
 clear
 read  CHOICE < sn.tmp
+clear
+echo SNAPSHOT: $CHOICE
 rm sn.tmp
 
+sleep 4s
 SNAPSHOTPATH="$SNAPSHOTSDIR/$CHOICE/snapshot"
 
 if [[ ! -d $SNAPSHOTPATH ]] ; then
@@ -123,20 +129,24 @@ fi
 
 cd $MOUNT
 
+echo Current dir:
+pwd
+sleep 4s
 if [[ ! -d btrfsroot ]]; then
-	mkdir btrfsroot
+	mkdir ./btrfsroot
 fi
 
-echo "MOUNTING BTRFS ROOT"
-mount -t btrfs -o subvolid=0 ${PARTITION} ./btrfsroot
+echo "MOUNTING BTRFS ROOT on dev ${DEV}"
+sleep 4s
+
+mount -t btrfs -o subvolid=0 ${DEV} ./btrfsroot
 echo "DONE"
 
 cd ./btrfsroot
-ls
 
 ENTRIES=()
 
-for i in $(ls); do
+for i in $(ls .); do
 	ENTRIES+=(${i} "btrfs" off)
 done
 
@@ -150,10 +160,11 @@ SUBVOLROOT=$(cat subvol.tmp)
 
 rm subvol.tmp
 
+clear
 
 if dialog --title "Confirmation" \
-	--yesno "Subvolume $SUBVOLROOT will now be renamed to ${SUBVOLROOT}-old and replaced with snapshot ${SHOICE}. \
-	if ${SUBVOLROOT}-old already exists, IT WILL BE DELETED!
+	--yesno "Subvolume $SUBVOLROOT will now be renamed to ${SUBVOLROOT}-old and replaced with snapshot ${SNAPSHOTPATH}. \
+	if ${SUBVOLROOT}-old already exists, IT WILL BE DELETED! \
 	\n\nProceed?" 0 0; then
 	if [[ -d ${SUBVOLROOT}-old ]]; then
 		if ! btrfs subvol delete ${SUBVOL}-old; then
@@ -174,12 +185,13 @@ if dialog --title "Confirmation" \
 
 fi
 
+clear
 
 
 cd ../
 umount ./btrfsroot
 
-if [[ ! -z REBOOT ]]; then
+if [[ ! -z $REBOOT ]]; then
 	reboot
 fi
 
