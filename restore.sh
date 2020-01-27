@@ -99,7 +99,6 @@ clear
 echo SNAPSHOT: $CHOICE
 rm sn.tmp
 
-sleep 4s
 SNAPSHOTPATH="$SNAPSHOTSDIR/$CHOICE/snapshot"
 
 if [[ ! -d $SNAPSHOTPATH ]] ; then
@@ -125,13 +124,8 @@ elif [[ ! -b $DEV ]]; then
 	exit 1
 fi
 
-
-
 cd $MOUNT
 
-echo Current dir:
-pwd
-sleep 4s
 if [[ ! -d btrfsroot ]]; then
 	mkdir ./btrfsroot
 fi
