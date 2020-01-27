@@ -1,14 +1,21 @@
 #!/bin/bash
 
-SAVEIFS=$IFS
-IFS=$'\n'
-SNAPSHOTS=$(sudo snapper --machine-readable csv -c root list | awk -F, '{printf "%s %s %s\n", $3, $8, $12}')
-for i in $SNAPSHOTS; do
-	echo ${i}
-done
+dialog --title "Snapshot" \
+	--radiolist "Select snapshot to restore" 0 0 0 \
+	$(for line in $(sudo snapper --machine-readable csv -c root list | awk -F, '{gsub(/\s/, "_", $8); gsub(/\s/, "_", $12); printf "%s %s_%s off\n", $3, $8, $12}' | tail -n +3); do
+		echo $line
+	done) >/dev/tty  2>sn.tmp
 
-IFS=$SAVEIFS
+clear
+read  CHOICE < sn.tmp
+if [[ -d /.snapshots/$CHOICE ]]; then
+	echo SNAPSHOT FOUND!
+fi
 exit 0
+
+
+
+	
 
 if [[ $EUID -ne 0 ]]; then
 	echo "Root privileges required. Exiting..."
