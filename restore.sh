@@ -47,9 +47,15 @@ while true; do
 	       -s | --snapshots-dir ) SNAPSHOTSDIR="$2"; shift 2;;
 	       -m | --mount-point ) MOUNT="$2"; shift 2;;
 	       -d | --device ) DEV="$2"; shift 2;;
+	       -h | --help ) echo $HELP; exit 0;;
 	       * ) break ;;
        esac
 done       
+
+if ! dialog --version >/dev/null 2>/dev/null; then
+	echo "Missing dialog package"
+	exit 1
+fi
 
 if [[ -d "/mnt" ]]; then 
 	MOUNT="/mnt"
