@@ -130,8 +130,6 @@ if [[ ! -d btrfsroot ]]; then
 	mkdir ./btrfsroot
 fi
 
-echo "MOUNTING BTRFS ROOT on dev ${DEV}"
-sleep 4s
 
 mount -t btrfs -o subvolid=0 ${DEV} ./btrfsroot
 echo "DONE"
@@ -160,8 +158,9 @@ if dialog --title "Confirmation" \
 	--yesno "Subvolume $SUBVOLROOT will now be renamed to ${SUBVOLROOT}-old and replaced with snapshot ${SNAPSHOTPATH}. \
 	if ${SUBVOLROOT}-old already exists, IT WILL BE DELETED! \
 	\n\nProceed?" 0 0; then
-	if [[ -d ${SUBVOLROOT}-old ]]; then
-		if ! btrfs subvol delete ${SUBVOL}-old; then
+	clear
+	if [[ -d "${SUBVOLROOT}-old" ]]; then
+		if ! btrfs subvol delete "${SUBVOLROOT}-old"; then
 			echo "Error deleting previous old partition"
 			exit 1
 		fi
