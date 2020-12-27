@@ -155,20 +155,13 @@ rm subvol.tmp
 clear
 
 if dialog --title "Confirmation" \
-	--yesno "Subvolume $SUBVOLROOT will now be renamed to ${SUBVOLROOT}-old and replaced with snapshot ${SNAPSHOTPATH}. \
-	if ${SUBVOLROOT}-old already exists, IT WILL BE DELETED! \
+	--yesno "Subvolume $SUBVOLROOT will now be renamed to ${SUBVOLROOT}-orphaned-<date> and replaced with snapshot ${SNAPSHOTPATH}. \
 	\n\nProceed?" 0 0; then
 	clear
-	if [[ -d "${SUBVOLROOT}-old" ]]; then
-		if ! btrfs subvol delete "${SUBVOLROOT}-old"; then
-			echo "Error deleting previous old partition"
-			exit 1
-		fi
-	fi
 
 	snapper create -c $CONFIG -d "Before rollback"
 
-	mv ${SUBVOLROOT} ${SUBVOLROOT}-old
+	mv ${SUBVOLROOT} ${SUBVOLROOT}-orphaned-$(date -u +"%Y-%m-%dT%H-%M-%S")
 	btrfs subvol snapshot $SNAPSHOTPATH $SUBVOLROOT
 
 	if dialog --title "Finish" \
