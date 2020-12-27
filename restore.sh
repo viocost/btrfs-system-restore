@@ -35,6 +35,9 @@ OPTIONS:
 
 "
 
+function get_parent_uuid(){
+	echo $(btrfs subvolume show $1 | grep "Parent UUID" | awk -F: '{ print $2 }' | sed -r 's/\s*//g; s/-//g')
+}
 
 if [[ $EUID -ne 0 ]]; then
 	echo "Root privileges required. Exiting..."
@@ -161,7 +164,15 @@ if dialog --title "Confirmation" \
 
 	snapper create -c $CONFIG -d "Before rollback"
 
-	mv ${SUBVOLROOT} ${SUBVOLROOT}-orphaned-$(date -u +"%Y-%m-%dT%H-%M-%S")
+	# Checking whether it is top level subvolume or snapshot
+	if [[ $(get_parent_uuid ${SUBVOLROOT}) ]]; then
+		# This is a snapshot. Marking it as orphaned with date.
+		# It can be later deleted
+		mv ${SUBVOLROOT} ${SUBVOLROOT}-snapshot-orphaned-$(date -u +"%Y-%m-%dT%H-%M-%S")
+	else
+		# No parent uuid, thus it is the actual subvolume and cannot be deleted later.
+		mv ${SUBVOLROOT} ${SUBVOLROOT}-subvol-inactive-$(date -u +"%Y-%m-%dT%H-%M-%S")
+	fi
 	btrfs subvol snapshot $SNAPSHOTPATH $SUBVOLROOT
 
 	if dialog --title "Finish" \
