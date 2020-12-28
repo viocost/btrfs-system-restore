@@ -4,7 +4,7 @@ It supports any subvolume naming scheme.
 
 ## Requirements
 1. BTRFS file system.
-2. Installed and configured for root snapper.
+2. Snapper installed and configured for root.
 3. Dialog terminal utility.
 
 
@@ -28,7 +28,7 @@ Usually it would be difficult to delete root subvolume, it will complain that th
 To find out whether current subvolume is a top level subvolume run 
 
 ```
-sudo btrfs subvolume show | grep "Parent UUID"
+sudo btrfs subvolume show /path/to/mounted/root/subvolume | grep "Parent UUID"
 ```
 If parent UUID is set, then it is a snapshot that can be safely deleted.
 If parent UUID is "-" (hyphen, no quotes) then it is top level subvolume.
