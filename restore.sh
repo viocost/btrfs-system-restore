@@ -158,7 +158,7 @@ rm subvol.tmp
 clear
 
 if dialog --title "Confirmation" \
-	--yesno "Subvolume $SUBVOLROOT will now be renamed to ${SUBVOLROOT}-orphaned-<date> and replaced with snapshot ${SNAPSHOTPATH}. \
+	--yesno "Subvolume $SUBVOLROOT will now be renamed to ${SUBVOLROOT}-abandoned-<date> and replaced with snapshot ${SNAPSHOTPATH}. \
 	\n\nProceed?" 0 0; then
 	clear
 
