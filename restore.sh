@@ -168,10 +168,10 @@ if dialog --title "Confirmation" \
 	if [[ $(get_parent_uuid ${SUBVOLROOT}) ]]; then
 		# This is a snapshot. Marking it as orphaned with date.
 		# It can be later deleted
-		mv ${SUBVOLROOT} ${SUBVOLROOT}-snapshot-orphaned-$(date -u +"%Y-%m-%dT%H-%M-%S")
+		mv ${SUBVOLROOT} ${SUBVOLROOT}-abandoned-$(date -u +"%Y-%m-%dT%H-%M-%S")
 	else
 		# No parent uuid, thus it is the actual subvolume and cannot be deleted later.
-		mv ${SUBVOLROOT} ${SUBVOLROOT}-subvol-inactive-$(date -u +"%Y-%m-%dT%H-%M-%S")
+		mv ${SUBVOLROOT} ${SUBVOLROOT}-TOP-abandoned-$(date -u +"%Y-%m-%dT%H-%M-%S")
 	fi
 	btrfs subvol snapshot $SNAPSHOTPATH $SUBVOLROOT
 
