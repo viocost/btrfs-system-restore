@@ -79,13 +79,8 @@ function get_subvolume_id(){
 	echo $(btrfs subvolume show $1 | grep "Subvolume ID:" | awk -F: '{ print $2 }' | sed -r 's/\s*//g; s/-//g')
 }
 
-if [[ $EUID -ne 0 ]]; then
-	echo "Root privileges required. Exiting..."
-	exit 1
-fi
 
 CONFIG="root"
-cp /etc/fstab /etc/fstab.bak-nal
 MOUNT="/mnt"
 
 while true; do
@@ -101,6 +96,12 @@ while true; do
 	       * ) break ;;
        esac
 done       
+
+
+if [[ $EUID -ne 0 ]]; then
+	echo "Root privileges required. Exiting..."
+	exit 1
+fi
 
 function check_snapper_configuration(){
 	if ! snapper -c "$1" list 2>/dev/null >/dev/null; then
