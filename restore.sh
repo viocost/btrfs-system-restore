@@ -97,7 +97,7 @@ function perform_rollback(){
 
 	#echo "Config: $1, subvolume: $2, Snapshot: $3"
 
-    snapper create -c $1 -d "Before rollback"
+    snapper -c $1 create  -d "Before rollback"
 
 	OLD_ID=$(get_subvolume_id $2)
 
@@ -217,13 +217,10 @@ function is_same_ancestor(){
 
 echo "$BTRFS_ROOT/$SUBVOLUME $SNAPSHOT"
 
-is_same_ancestor $BTRFS_ROOT/$SUBVOLUME $SNAPSHOT
 
-if [[ $(is_same_ancestor $BTRFS_ROOT/$SUBVOLUME $SNAPSHOT) == yes ]]; then
-	echo Doing rollback
-	perform_rollback $CONFIG $BTRFS_ROOT/$SUBVOLUME $SNAPSHOT
-
-fi
+echo Doing rollback
+perform_rollback $CONFIG $BTRFS_ROOT/$SUBVOLUME $SNAPSHOT
+echo Could not identify snapshot to subvolume. Aborting...
 
 
 
