@@ -1,4 +1,6 @@
 #!/bin/bash
+#
+VERSION="0.0.2"
 
 ABANDONED_FILENAME=abandoned
 ABANDONED_FILENAME_TOP=TOP_abandoned
@@ -6,21 +8,22 @@ BTRFS_ROOT_DIR=btrfsroot
 
 HELP="
 
+BTRFS rollback utility v$VERSION
+
 DESCRIPTION:
 
 This script will restore a snapshot taken by snapper by renaming current subvolume and replacing it with read-write copy of chosen snapshot.
 The replaced subvolume copy will remain and have to be cleared manually later.
 
 The script meant to be used for restoring system subvolume on all linux distributions that don't support Open SUSE style rollback.
--r | --reboot) REBOOT=true; shoft 1;;
-Running this script will not require any changes to GRUB configuration, as the new snapshot will replace current root subvolume.
-
 After running the script you may continue working, however, you will boot into the reverted snapshot state after rebooting.
 
 
 USAGE:
 
-sudo ./restore.sh [OPTIONS]
+sudo ./restore.sh -c <snapper_config> -s <path_to_desired_snapshot> -v <subvolume_name> [OPTIONS]
+
+
 
 
 OPTIONS:
@@ -29,11 +32,39 @@ OPTIONS:
                 default: root
 
 -d | --device - path to block device where BTRFS system reside.
+     Block device is determined automatically, if your system
+     has a single btrfs partition.
+     If system havs multiple btrfs partitions, then this option
+     should point to selected btrfs partition. Ex: /dev/sda2
 
 -m | --mount-point - mount point for BTRFS root.
-                     default: /mnt
+	 default: /mnt
+     Path to mount root btrfs partition.
 
 
+-s | --snapshot  - path to selected snapshot
+
+-v | --subvolume - the name of subvolume as it is appears in top BTRFS partition.
+     To find out the name - mount root BTRFS partition and ls its content.
+     Any name can be replaced with any snapshot.
+	 Be careful, don't replace root subvolume with home or log.
+     Examples: ./restore.sh -v @
+               ./restore.sh -v @home
+
+-f | --keep-fstab - tells the script to copy current partition scheme
+     to the restored snapshot. This is done by copying current /etc/fstab file (with replaced id)
+     to the newly created (from snapshot) subvolume. It also back up old /etc/fstab that was in the
+     snapshot. This option will work only if /etc/fstab is found in snapshot/etc/fstab.
+     This option also means that replaced subvolume is root. It is thus recommended to
+     reboot your system after the rollback.
+
+     WARNING! IF you perform multiple rollbacks during the same session, make sure that
+     root rollback is done last, otherwise fstab will contain wrong ids and the system will
+     not start. It is possible to rollback @home and then @ in the same session.
+
+-r | --reboot - automatically reboots the computer after successful rollback.
+
+-h | --help  - prints this message
 "
 
 function echoerr() {
