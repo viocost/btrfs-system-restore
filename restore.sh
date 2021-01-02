@@ -54,6 +54,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 CONFIG="root"
+cp /etc/fstab /etc/fstab.bak-nal
 MOUNT="/mnt"
 
 while true; do
@@ -121,6 +122,7 @@ function perform_rollback(){
 
 	LINE=$(egrep -n subvolid=$OLD_ID /etc/fstab | awk -F: '{ print $1 }')
 	#echo "New id: $NEW_ID line: $LINE"
+	cp /etc/fstab /etc/fstab.bak-$(date -u +"%Y-%m-%dT%H-%M-%S")
 	sed -r -i "${LINE}s/(.*)(subvolid=[0-9]*)(.*)/\1subvolid=${NEW_ID}\3/" /etc/fstab
 
 }
@@ -220,7 +222,6 @@ echo "$BTRFS_ROOT/$SUBVOLUME $SNAPSHOT"
 
 echo Doing rollback
 perform_rollback $CONFIG $BTRFS_ROOT/$SUBVOLUME $SNAPSHOT
-echo Could not identify snapshot to subvolume. Aborting...
 
 
 
