@@ -62,9 +62,10 @@ while true; do
 	       -s | --snapshot ) SNAPSHOT="$2"; shift 2;;
 		   -v | --subvolume ) SUBVOLUME="$2"; shift 2;;
 	       -c | --config) CONFIG="$2"; shift 2;;
+		   -f | --keep-fstab) KEEP_FSTAB=true; shift 1;; # if fstab is found in root of the snapshot and replaces subvolume, it is backed up and replaced with current fstab
 	       -m | --mount-point ) MOUNT="$2"; shift 2;; # optional
 	       -d | --device ) DEV="$2"; shift 2;;        # optional
-		   -r | --reboot) REBOOT=true; shoft 1;;      # optional
+		   -r | --reboot) REBOOT=true; shift 1;;      # optional
 	       -h | --help ) echo "$HELP"; exit 0;;
 	       * ) break ;;
        esac
@@ -104,17 +105,13 @@ function perform_rollback(){
 
 	#echo "OLD ID: $OLD_ID"
 
-	# Checking whether it is top level subvolume or snapshot
-	if [[ $(get_parent_uuid ${2}) ]]; then
-		# This is a snapshot. Marking it as orphaned with date.
-		# It can be later deleted
-		mv ${2} ${2}-$ABANDONED_FILENAME-$(date -u +"%Y-%m-%dT%H-%M-%S")
-		#echo non top
-	else
-		# No parent uuid, thus it is the actual subvolume and cannot be deleted later.
-		mv ${2} ${2}-$ABANDONED_FILENAME_TOP-$(date -u +"%Y-%m-%dT%H-%M-%S")
-		#echo top
-	fi
+	TIMESTAMP=$(date -u +"%Y-%m-%dT%H-%M-%S")
+
+
+	[[ $(get_parent_uuid ${2}) ]] && ABANDONED_PATH="${2}-${ABANDONED_FILENAME}-${TIMESTAMP}" \
+	    ||  ABANDONED_PATH="${2}-${ABANDONED_FILENAME_TOP}-${TIMESTAMP}";
+
+	mv ${2} $ABANDONED_PATH
 
 	btrfs subvol snapshot $3 $2
 
@@ -124,6 +121,22 @@ function perform_rollback(){
 	#echo "New id: $NEW_ID line: $LINE"
 	cp /etc/fstab /etc/fstab.bak-$(date -u +"%Y-%m-%dT%H-%M-%S")
 	sed -r -i "${LINE}s/(.*)(subvolid=[0-9]*)(.*)/\1subvolid=${NEW_ID}\3/" /etc/fstab
+
+	# If fstab is found in both subvolumes then
+	# Copying current fstab to the new subvolume
+	if [[ ! -z $KEEP_FSTAB ]]; then
+		if [[ -f ${2}/etc/fstab && -f ${ABANDONED_PATH}/etc/fstab ]]; then
+
+			echo Copying fstab
+
+			# backing up fstab in new subvolume
+			cp ${2}/etc/fstab ${2}/etc/fstab-bak-$TIMESTAMP
+
+			# copying current fstab
+			cp ${ABANDONED_PATH}/etc/fstab  ${2}/etc/fstab
+		fi
+	fi
+
 
 }
 
