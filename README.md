@@ -90,6 +90,17 @@ If for any reason the system refused to mount subvolumes at boot, do following:
 6. Reboot.
 7. Open an issue on github.
 
+## Known issues
+If kernel versions are different across the snapshots - the system may not boot after the rollback.
+This happens because pacman writes changes to EFI boot partition at /boot, and boot is not part of 
+btrfs. Thus, after the rollback the system will be looking for upgraded kernel and won't find it.
+
+To fix that - boot from arch bootable USB and reinstall the kernel package (linux or linux-lts or other), or rollback it to previous version.
+see version of kernel and the version of kernel package:
+uname -a
+pacman -Q linux
+
+
 
    
 

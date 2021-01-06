@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-VERSION="0.0.2"
+VERSION="0.0.3"
 
 ABANDONED_FILENAME=abandoned
 ABANDONED_FILENAME_TOP=TOP_abandoned
