@@ -152,7 +152,7 @@ function perform_rollback(){
 	LINE=$(egrep -n subvolid=$OLD_ID /etc/fstab | awk -F: '{ print $1 }')
 	#echo "New id: $NEW_ID line: $LINE"
 	cp /etc/fstab /etc/fstab.bak-$(date -u +"%Y-%m-%dT%H-%M-%S")
-	sed -r -i "${LINE}s/(.*)(subvolid=[0-9]*)(.*)/\1subvolid=${NEW_ID}\3/" /etc/fstab
+	sed -r -i "s/(.*)(subvolid=$OLD_ID)(.*)/\1subvolid=${NEW_ID}\3/" /etc/fstab
 
 	# If fstab is found in both subvolumes then
 	# Copying current fstab to the new subvolume
